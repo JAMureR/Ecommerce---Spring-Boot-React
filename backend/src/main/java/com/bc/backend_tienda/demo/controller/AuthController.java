@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.bc.backend_tienda.demo.model.User;
 import com.bc.backend_tienda.demo.repository.UserRepository;
+import com.bc.backend_tienda.demo.security.JwtUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class AuthController {
     // Login
     @PostMapping("/login")
     public Map<String, Object> loginUser(@RequestBody Map<String, String> loginData) {
+    	
         Map<String, Object> response = new HashMap<>();
 
         String email = loginData.get("email");
@@ -49,7 +51,7 @@ public class AuthController {
         if(userOpt.isPresent() && userOpt.get().getPassword().equals(password)) {
             User user = userOpt.get();
             // Simulamos JWT
-            String token = "fake-jwt-token-for-user-" + user.getId();
+            String token = JwtUtil.generateToken(user.getId());
 
             response.put("success", true);
             response.put("user", user);
