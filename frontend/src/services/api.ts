@@ -1,30 +1,48 @@
 import axios from 'axios';
 
-// Simulación de interceptor para JWT
+// Cliente Axios principal
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://localhost:8080/api',
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ===============================
+// INTERCEPTOR DE PETICIONES
+// ===============================
+// Añade automáticamente el JWT a todas las peticiones.
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
 
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ===============================
+// INTERCEPTOR DE RESPUESTAS
+// ===============================
+// Si el token expira o es inválido, cerramos sesión.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
     return Promise.reject(error);
   }
 );
 
-// Mocks para simular la API
+// ===============================
+// DATOS MOCK TEMPORALES
+// ===============================
+// Puedes mantenerlos mientras terminas el backend de productos.
 export const mockProducts = [
   {
     id: '1',
@@ -49,41 +67,11 @@ export const mockProducts = [
   {
     id: '3',
     name: 'Pantalones Palazzo de Satén',
-    price: 145.00,
+    price: 145.0,
     category: 'Pantalones',
     image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=800',
     description: 'Pantalones fluidos de tiro alto con acabado satinado.',
     sizes: ['XS', 'S', 'M', 'L'],
-    featured: false
-  },
-  {
-    id: '4',
-    name: 'Top de Encaje Chantilly',
-    price: 89.00,
-    category: 'Tops',
-    image: 'https://images.unsplash.com/photo-1551163943-3f6a855d1153?auto=format&fit=crop&q=80&w=800',
-    description: 'Top delicado con detalles de encaje francés.',
-    sizes: ['S', 'M', 'L'],
-    featured: true
-  },
-  {
-    id: '5',
-    name: 'Abrigo de Cashmere Camel',
-    price: 550.00,
-    category: 'Abrigos',
-    image: 'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&q=80&w=800',
-    description: 'Abrigo de lujo atemporal fabricado con el mejor cashmere.',
-    sizes: ['S', 'M', 'L'],
-    featured: true
-  },
-  {
-    id: '6',
-    name: 'Falda Midi Plisada Oro',
-    price: 120.00,
-    category: 'Faldas',
-    image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=800',
-    description: 'Falda con movimiento y brillo sutil para ocasiones especiales.',
-    sizes: ['XS', 'S', 'M'],
     featured: false
   }
 ];

@@ -14,16 +14,14 @@ export const authService = {
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
-        throw new Error("Error en la petición");
-      }
-
       const data = await response.json();
 
+      // Si el backend responde con success = false
       if (!data.success) {
         throw new Error(data.message || "Error en login");
       }
 
+      // Guardar JWT y usuario en localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -33,8 +31,13 @@ export const authService = {
       };
 
     } catch (error) {
-      console.error("LOGIN ERROR:", error);
-      throw error;
+      console.error("Error en login:", error);
+
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+
+      throw new Error("No se pudo conectar con el servidor");
     }
   },
 
